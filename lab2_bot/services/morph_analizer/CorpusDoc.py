@@ -45,7 +45,40 @@ class CorpusDoc:
 
     def __get_concordance_list(self, word:str) -> list[str]:
         #TODO : придумать как извлечь конкордансный список
-        return "..." + word + "..."
+        concordance_list = []
+        tokens = self.text.split() #слово / слово+запятая/точка / дефис
+        for i, token in enumerate(tokens): 
+            if token == word:
+                concordance = self.__extract_context(tokens, i, 5)
+                concordance_list.append(concordance)
+
+        return concordance_list
+    
+
+    def __extract_context(self, tokens: list[str], i:int, context: int) -> str:
+        left_context = right_context = 0
+        #for start/end of the text
+        if i - context < len(tokens[:i]):
+            left_context = tokens[:-(i - context)+1]
+        if len(tokens[i+1:]) < context:
+            right_context = tokens[i+1:]
+        
+        #for start/end of the sentence
+        str_left_context: str = " ".join(left_context)
+        if "." in str_left_context:
+            ind = str_left_context.rfind(".")
+            str_left_context = str_left_context[ind:]
+        
+        str_right_context: str = " ".join(right_context)
+        if "." in str_right_context:
+            ind = str_right_context.index(".")
+            str_right_context = str_right_context[:ind+1]
+
+        return "..." + str_left_context + " " + tokens[i] + " " + str_right_context + "..."
+        
+
+
+
 
     def pretty_print_stats(self, word: str):
         lemma_count = self.__get_lemma_stats(word)

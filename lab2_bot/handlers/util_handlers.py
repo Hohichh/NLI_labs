@@ -7,17 +7,19 @@ from aiogram.fsm.state import default_state
 from lexicon import LEXICON_RU
 from .states import FSMCorpus
 
-
+from services import CorpusManager
 
 util_router = Router()
 
 
 # /start - запуск бота
 @util_router.message(CommandStart(), StateFilter(default_state))
-async def process_start_command(message: Message):
+async def process_start_command(message: Message, state: FSMContext):
     await message.answer(
         text=LEXICON_RU['start']
     )
+    corpus_manager = CorpusManager()
+    await state.update_data(corpus=corpus_manager)
 
 # /cancel - отмена в дефолт состоянии
 @util_router.message(Command(commands='cancel'), StateFilter(default_state))
@@ -47,7 +49,7 @@ async def process_help_send_word_file(message: Message):
         text=LEXICON_RU["help_send_word_file"]
     )
 
-@util_router.message(Command(commands='help'), StateFilter(FSMCorpus.select_text))
+@util_router.message(Command(commands='help'), StateFilter(FSMCorpus.delete, FSMCorpus.view))
 async def process_help_select_text(message: Message):
     await message.answer(
         text=LEXICON_RU["help_select_text"]

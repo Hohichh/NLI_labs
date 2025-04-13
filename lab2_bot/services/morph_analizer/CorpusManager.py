@@ -67,7 +67,3 @@ class CorpusManager:
             concordance_list.extend(doc.get_concordance_list())
 
         return concordance_list
-            
-
-    
-    

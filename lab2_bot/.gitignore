@@ -8,4 +8,4 @@ __pycache__/
 logs/
 *.log
 
-handlers/
+handlers/dict_handlers.py

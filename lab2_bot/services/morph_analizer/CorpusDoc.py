@@ -1,13 +1,13 @@
 from docx import Document
 
-from morph_analizer import Dictionary, Lexeme
-from morph_analizer import nlp
+from .Dictionary import Dictionary, nlp
+from .Lexeme import Lexeme
 from lexicon import LEXICON_RU
 
 class CorpusDoc:
     def __init__(self, doc: Document):
-        self.title: str
-        self.author: str
+        self.title: str = ""
+        self.author: str = ""
         self.topic: str = "Gastronomy"
         self.text: str = self.__load_text(doc)
         self.__marking = Dictionary(self.text)
@@ -26,14 +26,17 @@ class CorpusDoc:
                                               concordances=concordance_list)
     
     def get_morph_info(self, word:str) -> str:
-        lexeme: Lexeme = self.__marking.dictionary[word]
-        return lexeme.pretty_print()
+        try:
+            lexeme: Lexeme = self.__marking.dictionary[word]
+            return lexeme.pretty_print()
+        except KeyError:
+            nltk_word = nlp(word)[0]
+            lexeme = Lexeme(nltk_word.lemma_, nltk_word.pos_)
+            return lexeme.pretty_print()
+
     
     def __load_text(self, doc: Document) -> str:
-        if not isinstance(doc, Document):
-            raise ValueError
-
-        document = doc
+        document: Document = doc
 
         full_text = []
         for paragraph in document.paragraphs:
@@ -61,13 +64,15 @@ class CorpusDoc:
         for word_form in self.__marking.dictionary.keys():
             if nltk_word.text == word_form:
                 counter = self.__marking.dictionary[word_form].count
-                return counter
+                break
+        
+        return counter
 
     def get_concordance_list(self, word:str) -> list[str]:
         concordance_list = []
         tokens = self.text.split() #слово / слово+запятая/точка / дефис
         for i, token in enumerate(tokens): 
-            if token == word:
+            if token.replace(".","").lower() == word.lower():
                 concordance = self.__extract_context(tokens, i, 5)
                 concordance_list.append(concordance)
 
@@ -76,8 +81,8 @@ class CorpusDoc:
 
     def __extract_context(self, tokens: list[str], i:int, context: int) -> str:
         #for start/end of the text
-        if i - context < len(tokens[:i]):
-            left_context = tokens[:-(i - context)+1]
+        if context > len(tokens[:i]):
+            left_context = tokens[:-(i - context)-1]
         else:
             left_context = tokens[i-context:i]
         if len(tokens[i+1:]) < context:

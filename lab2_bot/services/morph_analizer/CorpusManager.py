@@ -1,18 +1,17 @@
 from docx import Document
 
-from morph_analizer import CorpusDoc
+from .CorpusDoc import CorpusDoc
 from lexicon import LEXICON_RU
 
 class CorpusManager:
     def __init__(self): 
         self.document_list : list[CorpusDoc] = []
 
-    def add_doc(self, doc: Document) -> bool:
+    def add_doc(self, doc: CorpusDoc) -> bool:
         try:
-            document = CorpusDoc(doc)
-            self.document_list.append(document)
+            self.document_list.append(doc)
             return True
-        except ValueError:
+        except Exception:
             return False
 
     def delete_doc(self, ind: int) -> bool:
@@ -45,7 +44,7 @@ class CorpusManager:
                                                  morph_str=morph_info,
                                                  lemmas=lemma_count,
                                                  forms=forms_count,
-                                                 concordance=concordance_list)
+                                                 concordances=concordance_list)
 
     def __get_lemma_stats(self, word:str) -> int:
         lemmas = 0
@@ -64,6 +63,6 @@ class CorpusManager:
     def __get_concordance_list(self, word:str) -> list[str]:
         concordance_list = []
         for doc in self.document_list:
-            concordance_list.extend(doc.get_concordance_list())
+            concordance_list.extend(doc.get_concordance_list(word))
 
         return concordance_list

@@ -6,7 +6,7 @@ from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import default_state
 
-from handlers import FSMCorpus
+from .states import FSMCorpus
 from services import parse_add_word, CorpusDoc
 from lexicon import LEXICON_RU
 

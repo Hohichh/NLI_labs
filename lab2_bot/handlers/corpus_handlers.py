@@ -9,19 +9,19 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import default_state
 
 from lexicon import LEXICON_RU
-from handlers import FSMCorpus
+from .states import FSMCorpus
 from services import CorpusDoc, CorpusManager, parse_add_word
 
 
 corpus_router = Router()
 
-@corpus_router.message(Command(commands="/create_document"))
+@corpus_router.message(Command(commands="create_document"))
 async def process_create_commnad(message: Message, state: FSMContext):
     data = await state.get_data()
     corpus = data.get("corpus")
 
     if not corpus:
-        message.answer("Выберите /start, чтобы начать работу с корпусным менеджером")
+        await message.answer("Выберите /start, чтобы начать работу с корпусным менеджером")
         return
     
     await message.answer(text=LEXICON_RU["request_word_file"])
@@ -44,17 +44,11 @@ async def process_word_file_input(message: Message, state:FSMContext):
     doc = Document(doc_stream) #получаем word-документ 
     text_doc = CorpusDoc(doc)
         
-    # Сохраняем ВЕСЬ объект словаря в состоянии
     data = await state.get_data()
-    corpus_manager: CorpusManager = data.get("corpus") #Выгружаем сам менеджер
 
-    if not corpus_manager.add_doc(text_doc): #если что-то пошло не так при добавлении
-        await message.answer(text=LEXICON_RU["undefined_error"])
-        return 
-    
-    await state.update_data(corpus=corpus_manager)
-    await message.answer(text=LEXICON_RU["word_file_received"])
-    await state.set_state(default_state)
+    await state.update_data(added_doc=text_doc)
+    await state.set_state(FSMCorpus.title_input)
+    await message.answer(text="Введите заголовок:")
         
     
 @corpus_router.message(StateFilter(FSMCorpus.send_docx_file))
@@ -63,6 +57,33 @@ async def warning_not_word_file(message: Message):
         text=LEXICON_RU["not_word_file"]
     )
     
+@corpus_router.message(StateFilter(FSMCorpus.title_input))
+async def process_title_input(message: Message, state: FSMContext):
+    data = await state.get_data()
+    doc: CorpusDoc = data.get("added_doc")
+    doc.title = message.text
+    
+    await state.update_data(added_doc=doc)
+    await state.set_state(FSMCorpus.author_input)
+    await message.answer(text="Введите автора:")
+
+@corpus_router.message(StateFilter(FSMCorpus.author_input))
+async def process_author_input(message: Message, state: FSMContext):
+    data = await state.get_data()
+    doc: CorpusDoc = data.get("added_doc")
+    doc.author = message.text
+
+    corpus_manager: CorpusManager = data.get("corpus")
+
+    if not corpus_manager.add_doc(doc): #если что-то пошло не так при добавлении
+        await message.answer(text=LEXICON_RU["undefined_error"])
+        return 
+    
+    await state.update_data(corpus=corpus_manager)
+    await message.answer(text=LEXICON_RU["word_file_received"])
+    await state.set_state(default_state)
+
+
 
 @corpus_router.message(Command(commands="delete_document"))
 async def process_delete_commnad(message: Message, state:FSMContext):
@@ -70,7 +91,10 @@ async def process_delete_commnad(message: Message, state:FSMContext):
     corpus_manager: CorpusManager = data.get("corpus")
 
     if not corpus_manager:
-        message.answer("Выберите /start, чтобы начать работу с корпусным менеджером")
+        await message.answer("Выберите /start, чтобы начать работу с корпусным менеджером")
+        return
+    if not corpus_manager.document_list:
+        await message.answer("Корпус пуст. Добавьте тектовый документ")
         return
     
     title_list = corpus_manager.get_docs_name_list()
@@ -86,8 +110,12 @@ async def process_delete_text(message: Message, state: FSMContext):
     data = await state.get_data()
     corpus_manager: CorpusManager = data.get("corpus")
 
+    if not corpus_manager or not corpus_manager.document_list:
+        await message.answer(text="")
+
+
     if not corpus_manager.delete_doc(int(message.text)-1):
-        message.answer(text=LEXICON_RU["invalid_doc_number"])
+        await message.answer(text=LEXICON_RU["invalid_doc_number"])
         return
 
     await state.update_data(corpus=corpus_manager)
@@ -100,7 +128,10 @@ async def process_view_commnad(message: Message, state: FSMContext):
     corpus_manager: CorpusManager = data.get("corpus")
 
     if not corpus_manager:
-        message.answer("Выберите /start, чтобы начать работу с корпусным менеджером")
+        await message.answer("Выберите /start, чтобы начать работу с корпусным менеджером")
+        return
+    if not corpus_manager.document_list:
+        await message.answer("Корпус пуст. Добавьте тектовый документ")
         return
     
     title_list = corpus_manager.get_docs_name_list()
@@ -144,6 +175,16 @@ async def process_non_number_input(message: Message):
     
 @corpus_router.message(Command(commands="statistics"), StateFilter(default_state))
 async def process_stats_commnad(message: Message, state: FSMContext):
+    data = await state.get_data()
+    corpus_manager: CorpusManager = data.get("corpus")
+
+    if not corpus_manager:
+        await message.answer("Выберите /start, чтобы начать работу с корпусным менеджером")
+        return
+    if not corpus_manager.document_list:
+        await message.answer("Корпус пуст. Добавьте тектовый документ")
+        return
+
     await message.answer(text=LEXICON_RU["stats_word_input"])
     await state.set_state(FSMCorpus.stats_word_input)
 

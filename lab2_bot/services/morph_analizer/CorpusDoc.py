@@ -81,10 +81,9 @@ class CorpusDoc:
 
     def __extract_context(self, tokens: list[str], i:int, context: int) -> str:
         #for start/end of the text
-        if context > len(tokens[:i]):
-            left_context = tokens[:-(i - context)-1]
-        else:
-            left_context = tokens[i-context:i]
+        left_context = tokens[:i]  
+        if len(left_context) > context:  
+            left_context = left_context[i-context:i]
         if len(tokens[i+1:]) < context:
             right_context = tokens[i+1:]
         else:
@@ -97,9 +96,13 @@ class CorpusDoc:
             str_left_context = str_left_context[ind:]
         
         str_right_context: str = " ".join(right_context)
-        if "." in str_right_context:
+        if "." in tokens[i]:
+            str_right_context = ""
+        elif "." in str_right_context:
             ind = str_right_context.index(".")
             str_right_context = str_right_context[:ind+1]
+            print(str)
+        
 
         return "..." + str_left_context + " " + tokens[i] + " " + str_right_context + "..."
         

@@ -68,43 +68,35 @@ class CorpusDoc:
         
         return counter
 
-    def get_concordance_list(self, word:str) -> list[str]:
+    def get_concordance_list(self, sub_str:str) -> list[str]:
         concordance_list = []
         tokens = self.text.split() #слово / слово+запятая/точка / дефис
-        for i, token in enumerate(tokens): 
-            if token.replace(".","").lower() == word.lower():
-                concordance = self.__extract_context(tokens, i, 5)
+        sub_tokens = sub_str.split() #слово / слово+запятая/точка / дефис
+        for i in range(len(tokens)-len(sub_tokens)+1):
+            tokens_cut_str = " ".join(tokens[i:i+len(sub_tokens)]).lower().replace(".","")
+            if sub_str.lower() in tokens_cut_str:
+                concordance: str = self.__extract_context(tokens, i, i+len(sub_tokens)-1,5)
                 concordance_list.append(concordance)
 
         return concordance_list
     
 
-    def __extract_context(self, tokens: list[str], i:int, context: int) -> str:
+    def __extract_context(self, tokens: list[str], st_ind:int, end_ind, context: int) -> str:
         #for start/end of the text
-        left_context = tokens[:i]  
+        left_context = tokens[:st_ind]  
         if len(left_context) > context:  
-            left_context = left_context[i-context:i]
-        if len(tokens[i+1:]) < context:
-            right_context = tokens[i+1:]
+            left_context = left_context[st_ind-context:st_ind]
+        if len(tokens[end_ind:]) < context:
+            right_context = tokens[end_ind+1:]
         else:
-            right_context = tokens[i+1:i+context+1]
+            right_context = tokens[end_ind+1:end_ind+context+1]
         
         #for start/end of the sentence
         str_left_context: str = " ".join(left_context)
-        if "." in str_left_context:
-            ind = str_left_context.rfind(".")
-            str_left_context = str_left_context[ind:]
-        
         str_right_context: str = " ".join(right_context)
-        if "." in tokens[i]:
-            str_right_context = ""
-        elif "." in str_right_context:
-            ind = str_right_context.index(".")
-            str_right_context = str_right_context[:ind+1]
-            print(str)
-        
+        curr_substr: str = " ".join(tokens[st_ind:end_ind+1])
 
-        return "..." + str_left_context + " " + tokens[i] + " " + str_right_context + "..."
+        return "..." + str_left_context + " " + curr_substr + " " + str_right_context + "..."
         
 
     

@@ -60,9 +60,9 @@ class CorpusManager:
 
         return word_forms
 
-    def __get_concordance_list(self, word:str) -> list[str]:
+    def __get_concordance_list(self, sub_str:str) -> list[str]:
         concordance_list = []
         for doc in self.document_list:
-            concordance_list.extend(doc.get_concordance_list(word))
+            concordance_list.extend(doc.get_concordance_list(sub_str))
 
         return concordance_list

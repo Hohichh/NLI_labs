@@ -9,3 +9,5 @@ logs/
 *.log
 
 handlers/dict_handlers.py
+
+services/morph_analizer/test.py

@@ -32,7 +32,6 @@ async def main() -> None:
     dp.startup.register(set_main_menu)
     dp.include_routers(util_router, corpus_router, doc_router, default_router)
 
-
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
 

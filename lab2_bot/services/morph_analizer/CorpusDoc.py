@@ -1,5 +1,6 @@
 from docx import Document
 import aiofiles
+import re
 
 from .Dictionary import Dictionary, nlp
 from .Lexeme import Lexeme
@@ -76,17 +77,25 @@ class CorpusDoc:
 
     async def get_concordance_list(self, sub_str: str) -> list[str]:
         concordance_list = []
-        text = await self.text  # Use the property here
-        tokens = text.split()
-        sub_tokens = sub_str.split()
-
+        tokens = nlp(await self.text) # tokenized
+        sub_tokens = nlp(sub_str) # token sublist
+        sub_tokens[0].le
         for i in range(len(tokens) - len(sub_tokens) + 1):
-            tokens_cut_str = " ".join(tokens[i:i+len(sub_tokens)]).lower().replace(".", "")
-            if sub_str.lower() in tokens_cut_str:
+            tokens_cut = tokens[i:len(sub_tokens)]
+            if self.__check_substr_lemma(tokens_cut, sub_tokens):
                 concordance = self.__extract_context(tokens, i, i+len(sub_tokens)-1, 5)
-                concordance_list.append(concordance)
+                concordance_list.append(concordance) 
 
         return concordance_list
+    
+    
+    def __check_substr_lemma(self, tokens_cut, sub_tokens) -> bool:
+        matches = 0
+        for sub_token, token in zip(sub_tokens, tokens_cut):
+            if sub_token.lemma_ == token.lemma_ or sub_token.text == token.text:
+                matches += 1
+
+        return matches == len(sub_token)
 
     def __extract_context(self, tokens: list[str], st_ind: int, end_ind: int, context: int) -> str:
         left_context = tokens[:st_ind]
@@ -98,11 +107,27 @@ class CorpusDoc:
         else:
             right_context = tokens[end_ind+1:end_ind+context+1]
 
-        str_left_context = " ".join(left_context)
-        str_right_context = " ".join(right_context)
-        curr_substr = " ".join(tokens[st_ind:end_ind+1])
+        str_left_context = self.__collect_context_str(left_context)
+        str_right_context = self.__collect_context_str(right_context)
+        curr_substr = self.__collect_context_str(tokens[st_ind:end_ind+1])
 
         return "..." + str_left_context + " " + curr_substr + " " + str_right_context + "..."
         
+    def __collect_context_str(tokens) -> str:
+        result = []
+        
+        for i, token in enumerate(tokens):
+            if i == 0:
+                result.append(token.text)
+                continue
+            
+            prev_token = tokens[i - 1]
 
-    
+            if token.text in ",.:;!?)" or token.text.startswith("»"):
+                result.append(token.text)
+            elif prev_token.text in "«(":
+                result.append(token.text)
+            else:
+                result.append(" " + token.text)
+
+        return "".join(result)

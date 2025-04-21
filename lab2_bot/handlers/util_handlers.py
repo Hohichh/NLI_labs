@@ -18,7 +18,7 @@ async def process_start_command(message: Message, state: FSMContext):
     await message.answer(
         text=LEXICON_RU['start']
     )
-    corpus_manager = CorpusManager()
+    corpus_manager = CorpusManager(str(message.from_user.id))
     await state.update_data(corpus=corpus_manager)
 
 # /cancel - отмена в дефолт состоянии
@@ -33,6 +33,10 @@ async def process_cancel_FSM_command(message: Message, state: FSMContext):
     await message.answer(
         text=LEXICON_RU['cancel_state_in']
     )
+    data = await state.get_data()
+    manager: CorpusManager = data.get("corpus")
+    manager.clear_cache()
+    await state.update_data(corpus=manager)
     await state.set_state(default_state)
 
 # Хендлер для команды /help вне состояний

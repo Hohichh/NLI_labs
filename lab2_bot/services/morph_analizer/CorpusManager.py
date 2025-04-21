@@ -13,7 +13,12 @@ class CorpusManager:
         self.user_dir.mkdir(parents=True, exist_ok=True)
         self.document_list: list[CorpusDoc] = []
 
-    async def add_doc(self, doc: Document, title: str, author: str) -> bool:
+    def clear_cache(self) -> None:
+        for doc in self.document_list:
+            doc._text = None
+            doc._marking = None
+
+    async def add_doc(self, doc: Document, title: str, author: str) -> CorpusDoc | None:
         try:
             # взяли текст из ворд файла
             full_text = []
@@ -31,14 +36,14 @@ class CorpusManager:
             corpusDoc.author = author
 
             self.document_list.append(corpusDoc)  # добавили в список доков
-            return True
+            return corpusDoc
         except IOError as e:
             print(f"IO error: {e}")
         except Exception as e:
             print(f"something wrong: {e}")
         finally:
-            return False
-
+            return None
+        
     def delete_doc(self, ind: int) -> bool:
         try:
             temp_doc = self.document_list.pop(ind)

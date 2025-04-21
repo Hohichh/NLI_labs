@@ -10,7 +10,8 @@ async def set_main_menu(bot: Bot):
         BotCommand(command='/delete_document', description='Удалить текст из корпуса'),
         BotCommand(command='/view_document', description='Просмотр информации по тексту'),
         BotCommand(command='/statistics', description='Статистическая информация по слову'),
-        BotCommand(command='/cancel', description='Отменить текущее действие'),
+        BotCommand(command='/examples', descriptiob='Примеры употребления'),
+        BotCommand(command='/cancel', description='Отменить текущее действие')
     ]
     
     await bot.set_my_commands(main_menu_commands)

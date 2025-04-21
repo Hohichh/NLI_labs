@@ -38,8 +38,7 @@ class CorpusDoc:
             word_form=word,
             morph_str=morph_info,
             lemmas=lemma_count,
-            forms=word_form_count,
-            concordances=concordance_list
+            forms=word_form_count
         )
 
     async def get_morph_info(self, word: str) -> str:

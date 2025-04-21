@@ -31,7 +31,6 @@ class CorpusDoc:
     async def pretty_print_stats(self, word: str) -> str:
         lemma_count: str = str(await self.get_lemma_stats(word))
         word_form_count: str = str(await self.get_word_form_stats(word))
-        concordance_list: str = "\n".join(await self.get_concordance_list(word))
         morph_info = await self.get_morph_info(word)
 
         return LEXICON_RU["doc_stats"].format(
@@ -40,6 +39,10 @@ class CorpusDoc:
             lemmas=lemma_count,
             forms=word_form_count
         )
+    
+    async def pretty_print_concordance(self, substr:str) -> list[str]:
+        concordance_list: str = "\n".join(await self.get_concordance_list(substr))
+        return LEXICON_RU["examples_doc"].format(concordance=concordance_list)
 
     async def get_morph_info(self, word: str) -> str:
         marking = await self.marking  # Use the property here
@@ -78,7 +81,6 @@ class CorpusDoc:
         concordance_list = []
         tokens = nlp(await self.text) # tokenized
         sub_tokens = nlp(sub_str) # token sublist
-        sub_tokens[0].le
         for i in range(len(tokens) - len(sub_tokens) + 1):
             tokens_cut = tokens[i:len(sub_tokens)]
             if self.__check_substr_lemma(tokens_cut, sub_tokens):

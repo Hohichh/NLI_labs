@@ -200,8 +200,25 @@ async def process_stats_input(message: Message, state: FSMContext):
     await message.answer(text=stats)
 
 @corpus_router.message(Command(commands="examples"), StateFilter(default_state))
-async def process_stats_commnad(message: Message, state: FSMContext):
+async def process_examples_commnad(message: Message, state: FSMContext):
     data = await state.get_data()
-    manager = data.get('corpus')
+    manager: CorpusManager = data.get('corpus')
 
-    
+    if not manager:
+        await message.answer("Выберите /start, чтобы начать работу с корпусным менеджером")
+        return
+    if not manager.document_list:
+        await message.answer("Корпус пуст. Добавьте тектовый документ")
+        return
+
+    await message.answer(text=LEXICON_RU["examples_word_input"])
+    await state.set_state(FSMCorpus.examples_word_input)
+
+@corpus_router.message(StateFilter(FSMCorpus.examples_word_input))
+async def process_examples_input(message: Message, state: FSMContext):
+    word = message.text
+    data = await state.get_data()
+    corpus_manager: CorpusManager = data.get("corpus")
+
+    stats = corpus_manager.pretty_print_concordance(word)
+    await message.answer(text=stats)

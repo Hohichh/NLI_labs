@@ -75,16 +75,20 @@ class CorpusManager:
         return name_list
 
     async def pretty_print_stats(self, word: str) -> str:
-        lemma_count: str = str(await self.__get_lemma_stats(word))  # добавлен await
-        forms_count: str = str(await self.__get_word_form_stats(word))  # добавлен await
-        concordance_list: str = "\n".join(await self.__get_concordance_list(word))  # добавлен await
-        morph_info = await self.document_list[0].get_morph_info(word)  # добавлен await
+        lemma_count: str = str(await self.__get_lemma_stats(word))  
+        forms_count: str = str(await self.__get_word_form_stats(word))  
+        morph_info = await self.document_list[0].get_morph_info(word) 
         return LEXICON_RU["corpus_stats"].format(
             word_form=word,
             morph_str=morph_info,
             lemmas=lemma_count,
             forms=forms_count,
-            concordances=concordance_list
+        )
+    
+    async def pretty_print_concordance(self, substr:str) -> str:
+        concordance_list: str = "\n".join(await self.__get_concordance_list(substr))
+        return LEXICON_RU["corpus_doc"].format(
+            concordance=concordance_list
         )
 
     async def __get_lemma_stats(self, word: str) -> int:
@@ -104,6 +108,8 @@ class CorpusManager:
     async def __get_concordance_list(self, sub_str: str) -> list[str]:
         concordance_list = []
         for doc in self.document_list:
-            concordance_list.extend(await doc.get_concordance_list(sub_str))  # добавлен await
+            concordance_list.append(f"{doc.title} by {doc.author}:")
+            concordance_list.extend(await doc.get_concordance_list(sub_str))
+            concordance_list.append("\n")  # добавлен await
 
         return concordance_list

@@ -13,10 +13,12 @@ from lexicon import LEXICON_RU
 doc_router = Router()
 
 
-@doc_router.message(StateFilter(FSMCorpus.current_doc), Command(commands="examples"))
+@doc_router.message(StateFilter(FSMCorpus.current_doc, 
+                                FSMCorpus.current_doc_examples,
+                                FSMCorpus.current_doc_stats), Command(commands="examples"))
 async def process_examples_command(message: Message, state: FSMContext):
     await message.answer(text=LEXICON_RU["examples_word_input"])
-    state.set_state(FSMCorpus.current_doc_examples)
+    await state.set_state(FSMCorpus.current_doc_examples)
 
 @doc_router.message(StateFilter(FSMCorpus.current_doc_examples))
 async def process_examples_input(message: Message, state: FSMContext):
@@ -24,13 +26,15 @@ async def process_examples_input(message: Message, state: FSMContext):
     data = await state.get_data()
     curr_doc: CorpusDoc = data.get("curr_doc")
 
-    stats = curr_doc.pretty_print_concordance(word)
+    stats = await curr_doc.pretty_print_concordance(word)
     await message.answer(text=stats)
 
-@doc_router.message(StateFilter(FSMCorpus.current_doc), Command(commands="statistics"))
+@doc_router.message(StateFilter(FSMCorpus.current_doc, 
+                                FSMCorpus.current_doc_examples,
+                                FSMCorpus.current_doc_stats), Command(commands="statistics"))
 async def process_examples_command(message: Message, state: FSMContext):
     await message.answer(text=LEXICON_RU["stats_word_input"])
-    state.set_state(FSMCorpus.current_doc_stats)
+    await state.set_state(FSMCorpus.current_doc_stats)
 
 @doc_router.message(StateFilter(FSMCorpus.current_doc_stats))
 async def process_examples_input(message: Message, state: FSMContext):
@@ -43,5 +47,5 @@ async def process_examples_input(message: Message, state: FSMContext):
     data = await state.get_data()
     curr_doc: CorpusDoc = data.get("curr_doc")
 
-    stats = curr_doc.pretty_print_stats(word)
+    stats = await curr_doc.pretty_print_stats(word)
     await message.answer(text=stats)

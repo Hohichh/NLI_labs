@@ -25,12 +25,12 @@ async def main() -> None:
 
     bot = Bot(
         token=config.tg_Bot.token
-    )
+      )
     mem_state = MemoryStorage()
 
     dp = Dispatcher(storage=mem_state)
     dp.startup.register(set_main_menu)
-    dp.include_routers(util_router, corpus_router, doc_router, default_router)
+    dp.include_routers(util_router, doc_router, corpus_router, default_router)
 
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)

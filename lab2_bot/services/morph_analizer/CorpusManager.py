@@ -34,31 +34,34 @@ class CorpusManager:
             corpusDoc = CorpusDoc(path_to_text)  # связываем инстанс класса с файлом
             corpusDoc.title = title
             corpusDoc.author = author
-
+            # dicti = await corpusDoc.marking
+            # print(dicti.pretty_print_keys())
             self.document_list.append(corpusDoc)  # добавили в список доков
-            return corpusDoc
         except IOError as e:
             print(f"IO error: {e}")
         except Exception as e:
             print(f"something wrong: {e}")
         finally:
-            return None
+            return corpusDoc
         
     def delete_doc(self, ind: int) -> bool:
         try:
             temp_doc = self.document_list.pop(ind)
             file_path = Path(temp_doc._path)
             file_path.unlink()  # синхронное удаление файла
-
-            return True
+            result = True
+            
         except FileNotFoundError:
             print(f"Файл {file_path} не найден.")
+            result = False
         except PermissionError:
             print(f"Нет прав для удаления файла {file_path}.")
+            result = False
         except Exception as e:
             print(f"Произошла ошибка: {e}")
+            result = False
         finally:
-            return False
+            return result
 
     def get_doc(self, ind: int) -> CorpusDoc | None:
         try:
@@ -87,7 +90,7 @@ class CorpusManager:
     
     async def pretty_print_concordance(self, substr:str) -> str:
         concordance_list: str = "\n".join(await self.__get_concordance_list(substr))
-        return LEXICON_RU["corpus_doc"].format(
+        return LEXICON_RU["examples_corpus"].format(
             concordance=concordance_list
         )
 
@@ -108,8 +111,11 @@ class CorpusManager:
     async def __get_concordance_list(self, sub_str: str) -> list[str]:
         concordance_list = []
         for doc in self.document_list:
+            concordance_doc_list = await doc.get_concordance_list(sub_str)
+            if len(concordance_doc_list) == 0:
+                continue
             concordance_list.append(f"{doc.title} by {doc.author}:")
-            concordance_list.extend(await doc.get_concordance_list(sub_str))
+            concordance_list.extend(concordance_doc_list)
             concordance_list.append("\n")  # добавлен await
 
         return concordance_list

@@ -25,10 +25,11 @@ class Dictionary:
                 if token.pos_ != "PROPN":
                     lemma = lemma.lower()
                     text = text.lower()
-                lexeme = Lexeme(lemma, pos)
                 if text in dictionary:
-                    lexeme.count += 1
-                dictionary[text] = lexeme
+                    dictionary[text].count += 1
+                    # print(text + " --- " + str(dictionary[text].count))
+                else:
+                    dictionary[text] = Lexeme(lemma, pos)
 
         if not dictionary:
             return

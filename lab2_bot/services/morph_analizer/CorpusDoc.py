@@ -60,7 +60,9 @@ class CorpusDoc:
         counter: int = 0
 
         for lexeme in marking.dictionary.values():
-            if lexeme.lemma == nltk_word.lemma_:
+        # for key, lexeme in marking.dictionary.items():
+            if lexeme.lemma.lower() == nltk_word.lemma_.lower():
+                # print(lexeme.lemma + " --- " + key)
                 counter += lexeme.count
 
         return counter
@@ -69,9 +71,9 @@ class CorpusDoc:
         nltk_word = nlp(word)[0]
         marking = await self.marking  # Use the property here
         counter: int = 0
-
+        
         for word_form in marking.dictionary.keys():
-            if nltk_word.text == word_form:
+            if nltk_word.text.lower() == word_form.lower():
                 counter = marking.dictionary[word_form].count
                 break
 
@@ -82,7 +84,7 @@ class CorpusDoc:
         tokens = nlp(await self.text) # tokenized
         sub_tokens = nlp(sub_str) # token sublist
         for i in range(len(tokens) - len(sub_tokens) + 1):
-            tokens_cut = tokens[i:len(sub_tokens)]
+            tokens_cut = tokens[i:i+len(sub_tokens)]
             if self.__check_substr_lemma(tokens_cut, sub_tokens):
                 concordance = self.__extract_context(tokens, i, i+len(sub_tokens)-1, 5)
                 concordance_list.append(concordance) 
@@ -96,7 +98,7 @@ class CorpusDoc:
             if sub_token.lemma_ == token.lemma_ or sub_token.text == token.text:
                 matches += 1
 
-        return matches == len(sub_token)
+        return matches == len(sub_tokens) 
 
     def __extract_context(self, tokens: list[str], st_ind: int, end_ind: int, context: int) -> str:
         left_context = tokens[:st_ind]
@@ -108,13 +110,16 @@ class CorpusDoc:
         else:
             right_context = tokens[end_ind+1:end_ind+context+1]
 
-        str_left_context = self.__collect_context_str(left_context)
-        str_right_context = self.__collect_context_str(right_context)
-        curr_substr = self.__collect_context_str(tokens[st_ind:end_ind+1])
+        result_context_tokens = [*left_context, *tokens[st_ind:end_ind+1], *right_context]
+        result_str = self.__collect_context_str(result_context_tokens)
+        # str_left_context = self.__collect_context_str(left_context)
+        # str_right_context = self.__collect_context_str(right_context)
+        # curr_substr = self.__collect_context_str(tokens[st_ind:end_ind+1])
 
-        return "..." + str_left_context + " " + curr_substr + " " + str_right_context + "..."
+        # return "..." + str_left_context + " " + curr_substr + " " + str_right_context + "..."
+        return "..." + result_str.replace("\n","") + "..."
         
-    def __collect_context_str(tokens) -> str:
+    def __collect_context_str(self, tokens) -> str:
         result = []
         
         for i, token in enumerate(tokens):
@@ -132,3 +137,5 @@ class CorpusDoc:
                 result.append(" " + token.text)
 
         return "".join(result)
+    
+

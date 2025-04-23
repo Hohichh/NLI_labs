@@ -78,6 +78,7 @@ async def process_author_input(message: Message, state: FSMContext):
 
     if not corpus_doc: #если что-то пошло не так при добавлении
         await message.answer(text=LEXICON_RU["undefined_error"])
+        await state.set_state(default_state)
         return 
     
     await state.update_data(corpus=corpus_manager)
@@ -170,7 +171,7 @@ async def process_non_number_input(message: Message):
             text=LEXICON_RU["not_a_number"]
         )
     
-@corpus_router.message(Command(commands="statistics"), StateFilter(default_state))
+@corpus_router.message(Command(commands="statistics"))
 async def process_stats_commnad(message: Message, state: FSMContext):
     data = await state.get_data()
     corpus_manager: CorpusManager = data.get("corpus")
@@ -196,10 +197,10 @@ async def process_stats_input(message: Message, state: FSMContext):
     data = await state.get_data()
     corpus_manager: CorpusManager = data.get("corpus")
 
-    stats = corpus_manager.pretty_print_stats(word)
+    stats = await corpus_manager.pretty_print_stats(word)
     await message.answer(text=stats)
 
-@corpus_router.message(Command(commands="examples"), StateFilter(default_state))
+@corpus_router.message(Command(commands="examples"))
 async def process_examples_commnad(message: Message, state: FSMContext):
     data = await state.get_data()
     manager: CorpusManager = data.get('corpus')
@@ -220,5 +221,5 @@ async def process_examples_input(message: Message, state: FSMContext):
     data = await state.get_data()
     corpus_manager: CorpusManager = data.get("corpus")
 
-    stats = corpus_manager.pretty_print_concordance(word)
+    stats = await corpus_manager.pretty_print_concordance(word)
     await message.answer(text=stats)

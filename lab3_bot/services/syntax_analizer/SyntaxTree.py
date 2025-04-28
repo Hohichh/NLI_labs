@@ -28,7 +28,7 @@ class SyntaxTree:
  
         return root
     
-    def tree_to_json(self):
+    def tree_to_json(self) -> str:
         def node_to_json(node: Node) -> dict:
             return {
                 "text": node.text,
@@ -37,7 +37,21 @@ class SyntaxTree:
             }
 
         json_dict = node_to_json(self.root)
-        return json.dumps(json_dict)
+        return json.dumps(json_dict, indent=2, ensure_ascii=False)
+    
+    def json_to_tree(self, json_str:str) -> None:
+        json_dict = json.loads(json_str)
+
+        def json_to_node(data: dict) -> Node:
+            node = Node(data["tag"],text=data["text"])
+            for child in data.get("children", []):
+                child_node = json_to_node(child)
+                child_node.set_parent(node)
+                node.add_child(child_node)
+            return node
+        
+        root = json_to_node(json_dict)
+        self.root = root
 
     
 

@@ -6,7 +6,7 @@ class Node:
                  children: list[Node] = [], 
                  text: str = None):
         self.synt_tag = tag
-        self.text = None
+        self.text = text
         self.__parent = parent
         self.__children = children 
 

@@ -5,7 +5,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram import Bot, Dispatcher
 
 from configs import Config, load_config, set_main_menu
-from handlers import util_router, corpus_router, doc_router, default_router
+from handlers import util_router, main_route, default_router
 
 
 
@@ -30,7 +30,7 @@ async def main() -> None:
 
     dp = Dispatcher(storage=mem_state)
     dp.startup.register(set_main_menu)
-    dp.include_routers(util_router, doc_router, corpus_router, default_router)
+    dp.include_routers(util_router, main_route, default_router)
 
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)

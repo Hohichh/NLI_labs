@@ -3,12 +3,14 @@ from __future__ import annotations
 class Node:
     def __init__(self, tag: str = None, 
                  parent: Node = None, 
-                 children: list[Node] = [], 
-                 text: str = None):
+                 children: list[Node] = None, 
+                 text: str = None,
+                 num: int = None):
         self.synt_tag = tag
         self.text = text
         self.__parent = parent
-        self.__children = children 
+        self.__children = children if children is not None else []
+        self.num = num
 
     def set_parent(self, parent) -> None:
         self.__parent = parent

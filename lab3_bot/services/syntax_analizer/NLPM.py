@@ -1,3 +1,3 @@
 import spacy
 
-nlp = spacy.load("en_core_sub")
+nlp = spacy.load("en_core_web_sm")

@@ -1,0 +1,9 @@
+Linux - виртуализация, гипервизоры, линукс контейнеры, основные команды (grep, sed, awk, tail, cat)
+Bash/python + регулярные выражения
+Git - основы, наиболее используемые команды, различия во флоу
+Docker - основы в построении Dockerfile, сборка имеджей, запуск контейнеров как простым run так и через docker-compose. Связка нескольких сервисом между собой в docker-compose. 
+Веб сервера - основы apache и nginx, понимание reverse-proxy, базовых конфигураций, балансировка и использование различных upstream
+Ansible или другие инструменты onfiguration management (chef, puppet, saltstack)
+IaC - Terraform, Terragrunt, модули в терраформе
+Kubernetes - различия в on-premise, on-demand, cloud. Можно посмотреть minikube, если есть доступ к каким-либо клаудам - поюзать там.
+*CI/CD тулы, Gitlab CI, Github Actions, Jenkins, ArgoCD, CircleCI, Travis

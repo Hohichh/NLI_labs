@@ -1,6 +1,8 @@
-from .SyntaxTree import SyntaxTree
-from .Node import Node
-from .NLPM import nlp
+from .syntax_analizer.SyntaxTree import SyntaxTree
+from .syntax_analizer.Node import Node
+from .syntax_analizer.NLPM import nlp
+from .semantic_analizer.Argument import Argument
+from .semantic_analizer.Predicate import Predicate
 
 import aiofiles
 from docx import Document
@@ -16,7 +18,7 @@ class NLPManager:
         self.text = None
         self._sentences = None
         self._trees = None
-        self._predicates
+        self._predicates = None
         self._user_id = user_id
         self.file_path = Path(__file__).resolve().parents[2] / "data" / self._user_id
         self.file_path.mkdir(parents=True, exist_ok=True)
@@ -33,7 +35,17 @@ class NLPManager:
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     @property
     def predicates(self) -> list[Predicate]:
-        pass
+        trees = self.trees
+        if trees is None:
+            return None
+        if self._predicates is None:
+           pass
+
+
+    def __create_predicates(self, tree: SyntaxTree) -> list:
+        def iter_node(param):
+            pass
+        args = []
 
     
     @property
@@ -48,6 +60,8 @@ class NLPManager:
 
     @property
     def trees(self) -> list[SyntaxTree]:
+        if self.sentences is None:
+            return None
         if self._trees is None:
             sentences = [sent.text.strip() for sent in nlp(self.text).sents if sent.text.strip()]
             self._trees = [SyntaxTree(sentence) for sentence in sentences]

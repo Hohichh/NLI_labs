@@ -35,6 +35,8 @@ class SyntaxTree:
  
         return root
     
+
+    
     def tree_to_json(self) -> str:
         def node_to_json(node: Node) -> dict:
             return {

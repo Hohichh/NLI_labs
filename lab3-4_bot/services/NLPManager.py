@@ -1,17 +1,13 @@
-from .syntax_analizer.SyntaxTree import SyntaxTree
-from .syntax_analizer.Node import Node
-from .syntax_analizer.NLPM import nlp
-from .semantic_analizer.Argument import Argument
-from .semantic_analizer.Predicate import Predicate
+from syntax_analizer import SyntaxTree, Node, nlp
+from semantic_analizer import Argument, Predicate
+from .predicate_tags import PREDICATE_DEP_TAGS, ARGUMENT_DEP_TAGS
 
 import aiofiles
 from docx import Document
-import asyncio
-import os
 from pathlib import Path
 import uuid
 
-#TODO: работа с массивом предикатов !!!!!!!!!!!!!!!!!
+#TODO: трансляция предикатов в жсоны !!!!!!!!!!!!!!!!!
 
 class NLPManager:
     def __init__(self, user_id:str):
@@ -32,22 +28,46 @@ class NLPManager:
         self.text = text
         self._trees = None
 
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     @property
     def predicates(self) -> list[Predicate]:
+        pred_dict = {}
         trees = self.trees
         if trees is None:
             return None
         if self._predicates is None:
-           pass
+           for tree in trees:
+                predicates = self.__create_predicates(tree)
+                pred_dict[tree.sentence] = predicates
+        self._predicates = pred_dict
+        return self._predicates
 
 
     def __create_predicates(self, tree: SyntaxTree) -> list:
-        def iter_node(param):
-            pass
-        args = []
+        root = tree.root
+        predicates = []
+        def add_predicate(pred_list:list, node:Node):
+            if node.synt_tag not in PREDICATE_DEP_TAGS:
+                return
+            
+            predicate = Predicate(node.text)
+            args = {}
+            for child in node.get_children():
+                tag = child.synt_tag
+                value = child.text
+                if tag in PREDICATE_DEP_TAGS:
+                    add_predicate(pred_list, child)
+                elif tag in ARGUMENT_DEP_TAGS:
+                    args[tag] = value
+                else:
+                    continue
+            predicate._args = args
+            pred_list.append(predicate)
 
-    
+        add_predicate(predicates, root)
+        return predicates
+                    
+
+
     @property
     def sentences(self) -> list[str]:
         if self.text is None:

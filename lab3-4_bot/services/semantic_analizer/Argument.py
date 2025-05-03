@@ -1,5 +1,5 @@
 import json
-
+#TODO ПЕРЕИМЕНОВАТЬ. ЭТО БУДЕТ ПРОСТО СЕМАНТИЧЕСКАЯ ИНФА ПО СЛОВУ. БУДЕТ ОТОБРАЖАТЬСЯ ОТДЕЛЬНО ОТ ПРЕДИКАТОВ
 class Argument:
     def __init__(self, word:str | None):
         self.word = word

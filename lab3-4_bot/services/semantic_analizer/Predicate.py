@@ -2,7 +2,7 @@ import json
 
 from .Argument import Argument
 
-
+#TODO ПЕРЕПИСАТЬ
 class Predicate:
     def __init__(self, head:str | None):
         self.head:str = head
@@ -23,7 +23,7 @@ class Predicate:
 
     def to_json(self) -> str:
         return json.dumps(self.to_dict(),indent=2, ensure_ascii=False)
-
+#TODO НЕ ХРАНИТЬ ЭКЗЕМПЛЯРЫ КЛАССА ARGUMENT
     def from_json(self, json_str:str) -> None:
         json_dict = json.loads(json_str)
         self.head = json_dict["head"]

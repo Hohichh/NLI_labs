@@ -3,7 +3,7 @@ from __future__ import annotations
 class Node:
     def __init__(self, tag: str = None, 
                  parent: Node = None, 
-                 children: list[Node] = None, 
+                 children: list[Node] | None = None, 
                  text: str = None,
                  num: int = None):
         self.synt_tag = tag

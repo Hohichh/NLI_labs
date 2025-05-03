@@ -26,5 +26,8 @@ class SemanticArgument:
             else:
                 self.definitions.append(item)
 
-    
+    def to_json(self) -> str:
+        pass
 
+    def from_json(self, json_str:str) -> None:
+        pass

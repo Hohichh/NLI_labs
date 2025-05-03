@@ -9,11 +9,14 @@ import os
 from pathlib import Path
 import uuid
 
+#TODO: работа с массивом предикатов !!!!!!!!!!!!!!!!!
+
 class NLPManager:
     def __init__(self, user_id:str):
         self.text = None
         self._sentences = None
         self._trees = None
+        self._predicates
         self._user_id = user_id
         self.file_path = Path(__file__).resolve().parents[2] / "data" / self._user_id
         self.file_path.mkdir(parents=True, exist_ok=True)
@@ -26,6 +29,11 @@ class NLPManager:
         self.curr_text_path = save_path
         self.text = text
         self._trees = None
+
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    @property
+    def predicates(self) -> list[Predicate]:
+        pass
 
     
     @property
@@ -60,6 +68,13 @@ class NLPManager:
         async with aiofiles.open(self.curr_text_path, "w", encoding="utf-8") as f:
             await f.write(text)
         self.text = text
-        
 
+
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        
+    def get_predicates_json(self) -> str:
+        pass
+
+    def update_predicates_json(self) -> str:
+        pass
 

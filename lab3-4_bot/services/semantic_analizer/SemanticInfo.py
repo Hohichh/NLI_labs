@@ -1,6 +1,7 @@
 import json
-#TODO ПЕРЕИМЕНОВАТЬ. ЭТО БУДЕТ ПРОСТО СЕМАНТИЧЕСКАЯ ИНФА ПО СЛОВУ. БУДЕТ ОТОБРАЖАТЬСЯ ОТДЕЛЬНО ОТ ПРЕДИКАТОВ
-class Argument:
+
+
+class SemanticInfo:
     def __init__(self, word:str | None):
         self.word = word
         self._synonyms = set()
@@ -46,3 +47,4 @@ class Argument:
         self._synonyms = set(sem_info_dict["synonyms"])
         self._hypernyms = set(sem_info_dict["hypernyms"])
         self._definitions = sem_info_dict["definitions"]
+

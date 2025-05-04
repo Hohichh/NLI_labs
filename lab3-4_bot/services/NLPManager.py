@@ -1,13 +1,11 @@
 from syntax_analizer import SyntaxTree, Node, nlp
-from semantic_analizer import Argument, Predicate
-from .predicate_tags import PREDICATE_DEP_TAGS, ARGUMENT_DEP_TAGS
+from semantic_analizer import SemanticInfo, Predicate, predicate_parser, Dictionary
+from .semantic_analizer.predicate_tags import PREDICATE_DEP_TAGS, ARGUMENT_DEP_TAGS
 
 import aiofiles
 from docx import Document
 from pathlib import Path
 import uuid
-
-#TODO: трансляция предикатов в жсоны !!!!!!!!!!!!!!!!!
 
 class NLPManager:
     def __init__(self, user_id:str):
@@ -15,6 +13,7 @@ class NLPManager:
         self._sentences = None
         self._trees = None
         self._predicates = None
+        self._dictionary = None
         self._user_id = user_id
         self.file_path = Path(__file__).resolve().parents[2] / "data" / self._user_id
         self.file_path.mkdir(parents=True, exist_ok=True)
@@ -29,44 +28,26 @@ class NLPManager:
         self._trees = None
 
     @property
-    def predicates(self) -> list[Predicate]:
+    def dictionary(self) -> Dictionary:
+        if self.text is None:
+            return None
+        if self._dictionary is None:
+            sem_dict = Dictionary(self.text)
+            self._dictionary = sem_dict
+        return self._dictionary
+
+    @property
+    def predicates(self) -> dict[Predicate]:
         pred_dict = {}
         trees = self.trees
         if trees is None:
             return None
         if self._predicates is None:
            for tree in trees:
-                predicates = self.__create_predicates(tree)
+                predicates = predicate_parser(tree)
                 pred_dict[tree.sentence] = predicates
         self._predicates = pred_dict
         return self._predicates
-
-
-    def __create_predicates(self, tree: SyntaxTree) -> list:
-        root = tree.root
-        predicates = []
-        def add_predicate(pred_list:list, node:Node):
-            if node.synt_tag not in PREDICATE_DEP_TAGS:
-                return
-            
-            predicate = Predicate(node.text)
-            args = {}
-            for child in node.get_children():
-                tag = child.synt_tag
-                value = child.text
-                if tag in PREDICATE_DEP_TAGS:
-                    add_predicate(pred_list, child)
-                elif tag in ARGUMENT_DEP_TAGS:
-                    args[tag] = value
-                else:
-                    continue
-            predicate._args = args
-            pred_list.append(predicate)
-
-        add_predicate(predicates, root)
-        return predicates
-                    
-
 
     @property
     def sentences(self) -> list[str]:
@@ -102,13 +83,27 @@ class NLPManager:
         async with aiofiles.open(self.curr_text_path, "w", encoding="utf-8") as f:
             await f.write(text)
         self.text = text
-
-
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         
-    def get_predicates_json(self) -> str:
-        pass
+    def get_sent_preds_json(self, ind:int) -> str:
+        json_str = ""
+        sentence = self.sentences[ind]
+        predicates:list[Predicate] = self.predicates[sentence]
+        json_str += sentence + "\n".join([pred.to_json() for pred in predicates])
+        return json_str
+    
+    def word_sem_info_json(self, word:str) -> str:
+        curr_word = self.dictionary.dictionary[word]
+        json_str = curr_word.to_json()
+        return json_str
+    
+    def update_word_sem_info(self, word:str, json_str:str) -> None:
+        sem_info = self.dictionary.dictionary[word]
+        sem_info.to_json(json_str)
+        self.dictionary.dictionary[word] = sem_info
+    
 
-    def update_predicates_json(self) -> str:
-        pass
+    
+
+
+
 

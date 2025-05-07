@@ -9,7 +9,7 @@ class SyntaxTree:
 
     @property
     def sentence(self) -> str:
-        self._sentence = self.__restore_sentence()
+        # self._sentence = self.__restore_sentence()
         return self._sentence
 
     def __init_tree(self, sentence:str) -> Node:

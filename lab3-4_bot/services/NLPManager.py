@@ -1,5 +1,5 @@
-from syntax_analizer import SyntaxTree, Node, nlp
-from semantic_analizer import SemanticInfo, Predicate, predicate_parser, Dictionary
+from .syntax_analizer import SyntaxTree, Node, nlp
+from .semantic_analizer import SemanticInfo, Predicate, predicate_parser, Dictionary
 from .semantic_analizer.predicate_tags import PREDICATE_DEP_TAGS, ARGUMENT_DEP_TAGS
 
 import aiofiles
@@ -7,6 +7,8 @@ from docx import Document
 from pathlib import Path
 import uuid
 
+#короче тут какая-то проблема. вероятно что предложения выглядят одним образом, а поле у деревьев другим
+#хз почему
 class NLPManager:
     def __init__(self, user_id:str):
         self.text = None
@@ -37,17 +39,18 @@ class NLPManager:
         return self._dictionary
 
     @property
-    def predicates(self) -> dict[Predicate]:
-        pred_dict = {}
-        trees = self.trees
-        if trees is None:
-            return None
-        if self._predicates is None:
-           for tree in trees:
-                predicates = predicate_parser(tree)
-                pred_dict[tree.sentence] = predicates
-        self._predicates = pred_dict
-        return self._predicates
+    def predicates(self) -> dict[str,Predicate]:
+            pred_dict = {}
+            trees = self.trees
+            if trees is None:
+                return None
+            if self._predicates is None:
+                for tree in trees:
+                        predicates = predicate_parser(tree)
+                        pred_dict[tree.sentence] = predicates
+                self._predicates = pred_dict
+            return self._predicates
+
 
     @property
     def sentences(self) -> list[str]:
@@ -55,7 +58,7 @@ class NLPManager:
             return None
         if self._sentences is None:
             doc = nlp(self.text)
-            sentences = [sent.text for sent in doc.sents]
+            sentences = [sent.text.strip() for sent in doc.sents]
             self._sentences = sentences
         return self._sentences
 
@@ -64,7 +67,7 @@ class NLPManager:
         if self.sentences is None:
             return None
         if self._trees is None:
-            sentences = [sent.text.strip() for sent in nlp(self.text).sents if sent.text.strip()]
+            sentences = self.sentences
             self._trees = [SyntaxTree(sentence) for sentence in sentences]
         return self._trees
 
@@ -87,7 +90,17 @@ class NLPManager:
     def get_sent_preds_json(self, ind:int) -> str:
         json_str = ""
         sentence = self.sentences[ind]
-        predicates:list[Predicate] = self.predicates[sentence]
+        print("!!!!!!!!!!!!!!!!ПРЕДЛОЖЕНИЕ: " + "<"+sentence+">")
+        
+        try:
+            for key in self.predicates.keys():
+                print(key+"\n")
+            predicates:list[Predicate] = self.predicates[sentence]
+            
+        except KeyError:
+            print("KEYERROR: " + sentence)
+        # except Exception as e:
+        #     print(e)
         json_str += sentence + "\n".join([pred.to_json() for pred in predicates])
         return json_str
     

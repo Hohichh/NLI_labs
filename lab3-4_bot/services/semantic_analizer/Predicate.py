@@ -1,5 +1,5 @@
 import json
-from syntax_analizer import SyntaxTree, Node
+from ..syntax_analizer import SyntaxTree, Node
 from .predicate_tags import ARGUMENT_DEP_TAGS, PREDICATE_DEP_TAGS
 
 class Predicate:

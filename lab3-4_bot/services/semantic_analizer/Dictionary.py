@@ -2,7 +2,7 @@ from docx import Document
 import spacy
 from nltk.corpus import wordnet as wn
 
-from syntax_analizer import nlp
+from ..syntax_analizer import nlp
 from .SemanticInfo import SemanticInfo
 
 
